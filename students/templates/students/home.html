@@ -1,0 +1,47 @@
+{% extends 'students/base.html' %}
+{% block title %}Home | StudentHub{% endblock %}
+{% block content %}
+<section class="hero">
+    <div class="container hero-content">
+        <div class="hero-copy">
+            <span class="eyebrow">SIMPLE STUDENT RECORDS</span>
+            <h1>Student information,<br><span>made simple.</span></h1>
+            <p>A beginner-friendly website for viewing and managing student records. Built with Python and Django.</p>
+            <div class="hero-actions">
+                <a class="button button-white" href="{% url 'student_list' %}">View Students <span>→</span></a>
+                <a class="button button-outline" href="{% url 'add_student' %}">Add a Student</a>
+            </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+            <div class="art-card">
+                <div class="art-card-top"><span class="art-dot"></span><span class="art-dot"></span><span class="art-dot"></span></div>
+                <div class="art-avatar">S</div>
+                <div class="art-line long"></div><div class="art-line short"></div>
+                <div class="art-stats"><div><strong>{{ student_count }}</strong><small>Students</small></div><div><strong>01</strong><small>Project</small></div></div>
+            </div>
+            <div class="floating-badge">✦ Easy to use</div>
+        </div>
+    </div>
+</section>
+<section class="container intro">
+    <div class="section-kicker">WELCOME</div>
+    <div class="intro-text">
+        <h2>Your simple student<br>record manager.</h2>
+        <p>Use this sample project to practice Django basics. You can add student details, view the records in one place, search the list, and remove a record.</p>
+    </div>
+</section>
+<section class="feature-section">
+    <div class="container">
+        <div class="section-heading"><div><span class="section-kicker">WHAT YOU CAN DO</span><h2>Everything you need to get started.</h2></div></div>
+        <div class="feature-grid">
+            <article class="feature-card"><span class="feature-icon blue">＋</span><h3>Add Students</h3><p>Enter a student's number, name, course, year level, and email address.</p></article>
+            <article class="feature-card"><span class="feature-icon violet">▤</span><h3>View Records</h3><p>See all saved student records in a clear and organized table.</p></article>
+            <article class="feature-card"><span class="feature-icon green">⌕</span><h3>Search Records</h3><p>Find a student using their name, student number, or course.</p></article>
+        </div>
+    </div>
+</section>
+<section class="container bottom-cta">
+    <div><h2>Ready to explore?</h2><p>Open the student list to see your records.</p></div>
+    <a class="button button-primary" href="{% url 'student_list' %}">Go to Student List →</a>
+</section>
+{% endblock %}

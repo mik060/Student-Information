@@ -1,0 +1,24 @@
+{% extends 'students/base.html' %}
+{% block title %}Add Student | StudentHub{% endblock %}
+{% block content %}
+<section class="page-heading">
+    <div class="container"><span class="section-kicker">NEW RECORD</span><h1>Add a Student</h1><p>Fill in the information below to add a student to your records.</p></div>
+</section>
+<section class="container form-section">
+    <form method="post" class="student-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="form-grid">
+            {% for field in form %}
+            <div class="form-field {% if field.name == 'course' %}full-field{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                {% for error in field.errors %}<small class="error">{{ error }}</small>{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <div class="form-actions"><a class="button button-muted" href="{% url 'student_list' %}">Cancel</a><button class="button button-primary" type="submit">Save Student</button></div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'students/base.html' %}
+{% block title %}Students | StudentHub{% endblock %}
+{% block content %}
+<section class="page-heading">
+    <div class="container heading-row">
+        <div><span class="section-kicker">RECORD MANAGEMENT</span><h1>Student Records</h1><p>View and manage the students saved in your database.</p></div>
+        <a class="button button-primary" href="{% url 'add_student' %}">＋ Add Student</a>
+    </div>
+</section>
+<section class="container table-section">
+    <form class="search-form" method="get">
+        <input type="search" name="q" value="{{ query }}" placeholder="Search by name, number, or course..." aria-label="Search students">
+        <button class="button button-primary" type="submit">Search</button>
+        {% if query %}<a class="clear-link" href="{% url 'student_list' %}">Clear</a>{% endif %}
+    </form>
+    <div class="table-card">
+        <div class="table-title"><strong>All Students</strong><span>{{ students|length }} record{{ students|length|pluralize }}</span></div>
+        <div class="table-scroll">
+            <table>
+                <thead><tr><th>Student No.</th><th>Student Name</th><th>Course</th><th>Year</th><th>Email</th><th>Action</th></tr></thead>
+                <tbody>
+                {% for student in students %}
+                    <tr>
+                        <td class="student-number">{{ student.student_number }}</td>
+                        <td><strong>{{ student.first_name }} {{ student.last_name }}</strong></td>
+                        <td>{{ student.course }}</td>
+                        <td><span class="year-pill">Year {{ student.year_level }}</span></td>
+                        <td>{{ student.email|default:"—" }}</td>
+                        <td>
+                            <form method="post" action="{% url 'delete_student' student.id %}" onsubmit="return confirm('Delete this student record?');">
+                                {% csrf_token %}<button class="delete-button" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6" class="empty-state"><div class="empty-icon">▤</div><strong>No student records yet</strong><p>{% if query %}Try another search term.{% else %}Add your first student to get started.{% endif %}</p><a href="{% url 'add_student' %}" class="button button-primary">＋ Add Student</a></td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}
