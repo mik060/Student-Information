@@ -1,6 +1,9 @@
 import os
 from pathlib import Path
 
+import firebase_admin
+from firebase_admin import credentials, firestore
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get(
@@ -13,6 +16,22 @@ ALLOWED_HOSTS = [
     for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if host.strip()
 ]
+
+DEFAULT_FIREBASE_CREDENTIALS = Path(r"C:\Users\User\Desktop\firebase")
+FIREBASE_CREDENTIALS_PATH = Path(
+    os.environ.get("FIREBASE_CREDENTIALS_PATH", str(DEFAULT_FIREBASE_CREDENTIALS / "studenthubb-firebase-adminsdk-fbsvc-89902616c4.json"))
+)
+
+if FIREBASE_CREDENTIALS_PATH.exists():
+    try:
+        if not firebase_admin._apps:
+            cred = credentials.Certificate(str(FIREBASE_CREDENTIALS_PATH))
+            firebase_admin.initialize_app(cred)
+        db = firestore.client()
+    except Exception:
+        db = None
+else:
+    db = None
 
 INSTALLED_APPS = [
     "django.contrib.admin",
