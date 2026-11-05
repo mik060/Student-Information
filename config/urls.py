@@ -7,5 +7,5 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("students/", views.student_list, name="student_list"),
     path("students/add/", views.add_student, name="add_student"),
-    path("students/<int:student_id>/delete/", views.delete_student, name="delete_student"),
+    path("students/<str:student_id>/delete/", views.delete_student, name="delete_student"),
 ]

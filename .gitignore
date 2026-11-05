@@ -8,3 +8,5 @@ staticfiles/
 .DS_Store
 .vscode/
 .idea/
+firebase*.json
+**/firebase*.json
