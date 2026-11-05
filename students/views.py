@@ -1,10 +1,9 @@
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 
 from config.settings import db
 
 from .forms import StudentForm
-from .models import Student
 
 
 def _firestore_students():
@@ -37,7 +36,7 @@ def _matches_query(student, query):
 
 def home(request):
     firestore_students = _firestore_students()
-    student_count = len(firestore_students) if firestore_students is not None else Student.objects.count()
+    student_count = len(firestore_students) if firestore_students is not None else 0
     return render(request, "students/home.html", {"student_count": student_count})
 
 
@@ -46,45 +45,46 @@ def student_list(request):
 
     firestore_students = _firestore_students()
     if firestore_students is not None:
-        filtered_students = [student for student in firestore_students if _matches_query(student, query)]
-        return render(request, "students/student_list.html", {"students": filtered_students, "query": query})
-
-    students = Student.objects.all()
-    if query:
-        students = (
-            students.filter(first_name__icontains=query)
-            | students.filter(last_name__icontains=query)
-            | students.filter(student_number__icontains=query)
-            | students.filter(course__icontains=query)
+        filtered_students = [
+            student for student in firestore_students if _matches_query(student, query)
+        ]
+        return render(
+            request,
+            "students/student_list.html",
+            {"students": filtered_students, "query": query},
         )
-    return render(request, "students/student_list.html", {"students": students.distinct(), "query": query})
+
+    return render(
+        request,
+        "students/student_list.html",
+        {"students": [], "query": query, "firestore_unavailable": True},
+    )
 
 
 def add_student(request):
     if request.method == "POST":
         form = StudentForm(request.POST)
         if form.is_valid():
-            student = form.save()
-
             if db is not None:
                 try:
-                    student_id = str(student.student_number).strip()
-                    db.collection("students").document(student_id).set(
-                        {
-                            "student_number": student.student_number,
-                            "first_name": student.first_name,
-                            "last_name": student.last_name,
-                            "course": student.course,
-                            "year_level": student.year_level,
-                            "email": student.email,
-                        }
-                    )
-                except Exception:
-                    messages.error(request, "Student was saved locally but Firestore sync failed.")
+                    student_data = {
+                        "student_number": form.cleaned_data["student_number"].strip(),
+                        "first_name": form.cleaned_data["first_name"].strip(),
+                        "last_name": form.cleaned_data["last_name"].strip(),
+                        "course": form.cleaned_data["course"].strip(),
+                        "year_level": form.cleaned_data["year_level"],
+                        "email": form.cleaned_data["email"].strip()
+                        if form.cleaned_data["email"]
+                        else "",
+                    }
+                    student_id = student_data["student_number"]
+                    db.collection("students").document(student_id).set(student_data)
+                    messages.success(request, "Student added successfully.")
                     return redirect("student_list")
-
-            messages.success(request, "Student added successfully.")
-            return redirect("student_list")
+                except Exception as e:
+                    messages.error(request, f"Failed to save student: {e}")
+            else:
+                messages.error(request, "Firestore is not available.")
     else:
         form = StudentForm()
     return render(request, "students/student_form.html", {"form": form})
@@ -97,18 +97,11 @@ def delete_student(request, student_id):
                 firestore_doc = db.collection("students").document(str(student_id))
                 if firestore_doc.get().exists:
                     firestore_doc.delete()
-            except Exception:
-                pass
-
-        try:
-            student = get_object_or_404(Student, id=int(student_id))
-            student.delete()
-        except (TypeError, ValueError):
-            try:
-                student = get_object_or_404(Student, student_number=str(student_id))
-                student.delete()
-            except Exception:
-                pass
-
-        messages.success(request, "Student record deleted.")
+                    messages.success(request, "Student record deleted.")
+                else:
+                    messages.error(request, "Student not found.")
+            except Exception as e:
+                messages.error(request, f"Failed to delete student: {e}")
+        else:
+            messages.error(request, "Firestore is not available.")
     return redirect("student_list")

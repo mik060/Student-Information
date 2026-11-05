@@ -2,3 +2,4 @@ Django>=5.2,<6.0
 gunicorn>=23.0
 whitenoise>=6.9
 firebase-admin>=7.0.0
+python-dotenv>=1.0.0
